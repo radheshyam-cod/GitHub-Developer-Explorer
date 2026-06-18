@@ -1,27 +1,36 @@
-/**
- * Displays the loading skeleton and disables the search button
- */
 export const showLoading = () => {
     const loadingContainer = document.getElementById('loading-container');
-    const profileContainer = document.getElementById('profile-container');
+    const dashboardContent = document.getElementById('dashboard-content');
     const searchBtn = document.getElementById('search-btn');
 
     loadingContainer.classList.remove('hidden');
-    profileContainer.classList.add('hidden');
     
-    searchBtn.disabled = true;
-    searchBtn.textContent = 'Searching...';
+    // Ensure dashboard content is hidden while skeleton loads
+    if (dashboardContent) {
+        dashboardContent.classList.add('hidden');
+    }
+    
+    if (searchBtn) {
+        searchBtn.disabled = true;
+        searchBtn.textContent = 'Searching...';
+    }
 };
 
-/**
- * Hides the loading skeleton and re-enables the search button
- */
 export const hideLoading = () => {
     const loadingContainer = document.getElementById('loading-container');
+    const dashboardContent = document.getElementById('dashboard-content');
     const searchBtn = document.getElementById('search-btn');
 
     loadingContainer.classList.add('hidden');
     
-    searchBtn.disabled = false;
-    searchBtn.textContent = 'Search';
+    // We only show dashboardContent if the request was successful
+    // The search.js handles this, but usually we just reveal it here.
+    if (dashboardContent) {
+        dashboardContent.classList.remove('hidden');
+    }
+    
+    if (searchBtn) {
+        searchBtn.disabled = false;
+        searchBtn.textContent = 'Search';
+    }
 };
