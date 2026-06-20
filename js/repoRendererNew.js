@@ -67,9 +67,9 @@ function populateLanguageFilter(repos) {
     
     const sortedLangs = Array.from(languages).sort();
     
-    let optionsHTML = '<option value="all">All Languages ▼</option>';
+    let optionsHTML = '<option value="all">All Languages</option>';
     sortedLangs.forEach(lang => {
-        optionsHTML += `<option value="${escapeHtml(lang)}">${escapeHtml(lang)} ▼</option>`;
+        optionsHTML += `<option value="${escapeHtml(lang)}">${escapeHtml(lang)}</option>`;
     });
     
     // Retain current filter if it exists
@@ -145,7 +145,7 @@ export const clearRepos = () => {
     }
     const filterSelect = document.getElementById('filter-select');
     if (filterSelect) {
-        filterSelect.innerHTML = '<option value="all">All Languages ▼</option>';
+        filterSelect.innerHTML = '<option value="all">All Languages</option>';
     }
 };
 
