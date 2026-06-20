@@ -4,8 +4,8 @@ import { renderProfile, clearProfile } from './profileRenderer.js';
 import { showLoading, hideLoading } from './loader.js';
 import { showError, clearError } from './errorHandler.js';
 import { setState } from './state.js';
-import { renderRepos, initRepoSorting, clearRepos, clearChart } from './repoRenderer.js';
-import { renderChart } from './chartRenderer.js';
+import { renderRepos, initRepoSorting, clearRepos } from './repoRendererNew.js';
+import { renderChart, clearLangChart } from './chartRenderer.js';
 
 /**
  * Initializes the search module by setting up form event listeners.
@@ -17,18 +17,16 @@ export const initSearch = () => {
     if (!form || !input) return;
 
     form.addEventListener('submit', async (e) => {
-        // Prevent form submission from reloading the page (handles Enter key and button click natively)
         e.preventDefault();
 
         const username = input.value;
 
         clearRepos();
-        clearChart();
+        clearLangChart();
 
         clearError();
         clearProfile();
 
-        // 1. Input Validation
         const { isValid, error, sanitized } = validateUsername(username);
 
         if (!isValid) {
@@ -36,7 +34,6 @@ export const initSearch = () => {
             return;
         }
 
-        // 2. Begin API Request
         showLoading();
 
         try {
@@ -50,10 +47,8 @@ export const initSearch = () => {
             initRepoSorting();
 
         } catch (err) {
-            // 5. Handle Errors
             showError(err.message || 'An unexpected error occurred while fetching user data.');
         } finally {
-            // 6. Final Cleanup
             hideLoading();
         }
     });

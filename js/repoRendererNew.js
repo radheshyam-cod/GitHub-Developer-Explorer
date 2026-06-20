@@ -1,31 +1,11 @@
 import { getState, setState } from './state.js';
-import { animate, stagger } from 'https://cdn.jsdelivr.net/npm/motion@11.11.13/+esm';
+import { langColors } from './constants.js';
 
 const sorters = {
     stars: (a, b) => (b.stargazers_count || 0) - (a.stargazers_count || 0),
     forks: (a, b) => (b.forks_count || 0) - (a.forks_count || 0),
     updated: (a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0),
     name: (a, b) => (a.name || '').localeCompare(b.name || ''),
-};
-
-const langColors = {
-    JavaScript: '#f1e05a',
-    TypeScript: '#3178c6',
-    HTML: '#e34c26',
-    CSS: '#563d7c',
-    Python: '#3572A5',
-    Java: '#b07219',
-    C: '#555555',
-    'C++': '#f34b7d',
-    'C#': '#178600',
-    Ruby: '#701516',
-    Go: '#00ADD8',
-    Rust: '#dea584',
-    PHP: '#4F5D95',
-    Vue: '#41b883',
-    Svelte: '#ff3e00',
-    Shell: '#89e051',
-    default: '#8B5CF6'
 };
 
 function formatDate(isoString) {
@@ -131,9 +111,11 @@ export const renderRepos = () => {
 
     const sorted = [...filteredRepos].sort(sorters[sortKey] || sorters.stars);
     container.innerHTML = sorted.map(renderCard).join('');
-    
-    // Animate the repository cards
-    animate('.repo-anim', { opacity: [0, 1], y: [20, 0] }, { duration: 0.4, delay: stagger(0.05) });
+
+    // Stagger card animations
+    container.querySelectorAll('.repo-anim').forEach((el, i) => {
+        el.style.animationDelay = `${i * 0.05}s`;
+    });
 };
 
 export const initRepoSorting = () => {
@@ -167,9 +149,4 @@ export const clearRepos = () => {
     }
 };
 
-export const clearChart = () => {
-    const chartArea = document.querySelector('.chart-area');
-    if (chartArea) {
-        chartArea.innerHTML = '<canvas id="language-chart"></canvas>';
-    }
-};
+

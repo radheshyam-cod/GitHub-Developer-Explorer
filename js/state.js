@@ -9,53 +9,42 @@ const initialState = {
 };
 
 let state = { ...initialState };
+let persisted = {};
 
-function loadFromStorage() {
-    try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            state.lastSearchedUsername = parsed.lastSearchedUsername || '';
-            if (parsed.rateLimitRemaining !== undefined) {
-                state.rateLimitRemaining = parsed.rateLimitRemaining;
-            }
+try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        persisted = JSON.parse(saved);
+        state.lastSearchedUsername = persisted.lastSearchedUsername || '';
+        if (persisted.rateLimitRemaining !== undefined) {
+            state.rateLimitRemaining = persisted.rateLimitRemaining;
         }
-    } catch (e) {
-        // Ignore parse errors
     }
+} catch (e) {
+    // Ignore parse errors
 }
-
-loadFromStorage();
 
 export const getState = () => state;
 
 export const setState = (partial) => {
     state = { ...state, ...partial };
 
-    if ('currentUser' in partial && partial.currentUser && typeof partial.currentUser.login === 'string') {
-        try {
-            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-            saved.lastSearchedUsername = partial.currentUser.login;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-        } catch (e) {
-            // Ignore storage errors
-        }
-    }
+    let changed = false;
 
+    if ('currentUser' in partial && partial.currentUser?.login) {
+        persisted.lastSearchedUsername = partial.currentUser.login;
+        changed = true;
+    }
     if ('rateLimitRemaining' in partial) {
+        persisted.rateLimitRemaining = partial.rateLimitRemaining;
+        changed = true;
+    }
+
+    if (changed) {
         try {
-            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-            saved.rateLimitRemaining = partial.rateLimitRemaining;
-            saved.rateLimitUpdatedAt = Date.now();
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
         } catch (e) {
             // Ignore storage errors
         }
     }
 };
-
-export const resetState = () => {
-    state = { ...initialState, lastSearchedUsername: state.lastSearchedUsername };
-};
-
-export default state;

@@ -1,25 +1,47 @@
-// Using Chart.js which is globally available via CDN in index.html
+import { langColors } from './constants.js';
 
 let chartInstance = null;
 
-const langColors = {
-    JavaScript: '#f1e05a',
-    TypeScript: '#3178c6',
-    HTML: '#e34c26',
-    CSS: '#563d7c',
-    Python: '#3572A5',
-    Java: '#b07219',
-    C: '#555555',
-    'C++': '#f34b7d',
-    'C#': '#178600',
-    Ruby: '#701516',
-    Go: '#00ADD8',
-    Rust: '#dea584',
-    PHP: '#4F5D95',
-    Vue: '#41b883',
-    Svelte: '#ff3e00',
-    Shell: '#89e051',
-    default: '#8B5CF6'
+function getTheme() {
+    return document.documentElement.classList.contains('light') ? 'light' : 'dark';
+}
+
+function centerTextPlugin(total) {
+    return {
+        id: 'centerText',
+        beforeDraw(chart) {
+            const { width, height, ctx } = chart;
+            ctx.save();
+
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const isLight = getTheme() === 'light';
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            ctx.font = "bold 28px 'Poppins', sans-serif";
+            ctx.fillStyle = isLight ? '#0F172A' : '#F8FAFC';
+            ctx.fillText(total, centerX, centerY - 10);
+
+            ctx.font = "12px 'Inter', sans-serif";
+            ctx.fillStyle = isLight ? '#64748B' : '#94A3B8';
+            ctx.fillText('repos', centerX, centerY + 18);
+
+            ctx.restore();
+        }
+    };
+}
+
+export const clearLangChart = () => {
+    if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+    }
+    const chartArea = document.querySelector('.chart-area');
+    if (chartArea) {
+        chartArea.innerHTML = '<canvas id="language-chart"></canvas>';
+    }
 };
 
 export const renderChart = (repos) => {
@@ -30,7 +52,6 @@ export const renderChart = (repos) => {
 
     const ctx = canvas.getContext('2d');
 
-    // Aggregate languages
     const langCounts = {};
     repos.forEach(repo => {
         if (repo.language) {
@@ -40,45 +61,43 @@ export const renderChart = (repos) => {
 
     const labels = Object.keys(langCounts);
     const data = Object.values(langCounts);
-    
-    if (labels.length === 0) {
-        // No languages found, we can hide the chart or show a message
-        // For now, let's just not render
-        return;
-    }
+    const total = data.reduce((s, v) => s + v, 0);
+
+    if (labels.length === 0) return;
 
     const backgroundColors = labels.map(lang => langColors[lang] || langColors.default);
 
-    // Destroy existing chart to prevent memory leaks and overlay issues
     if (chartInstance) {
         chartInstance.destroy();
     }
 
-    // Ensure Chart is defined (from CDN)
     if (typeof Chart !== 'undefined') {
-        // Register dark theme defaults
-        Chart.defaults.color = '#94A3B8';
+        const isLight = getTheme() === 'light';
+
+        Chart.defaults.color = isLight ? '#64748B' : '#94A3B8';
         Chart.defaults.font.family = "'Inter', sans-serif";
-        
+
         chartInstance = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: labels,
+                labels,
                 datasets: [{
-                    data: data,
+                    data,
                     backgroundColor: backgroundColors,
-                    borderWidth: 2,
-                    borderColor: '#1E293B', // Match card bg to create spacing between slices
-                    hoverOffset: 4
+                    borderWidth: 3,
+                    borderColor: isLight ? '#FFFFFF' : '#1E293B',
+                    hoverOffset: 8,
+                    hoverBorderWidth: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                cutout: '70%',
                 animation: {
                     animateScale: true,
                     animateRotate: true,
-                    duration: 1000,
+                    duration: 1200,
                     easing: 'easeOutQuart'
                 },
                 plugins: {
@@ -87,28 +106,35 @@ export const renderChart = (repos) => {
                         labels: {
                             padding: 20,
                             usePointStyle: true,
-                            pointStyle: 'circle'
+                            pointStyle: 'circle',
+                            font: { size: 12, family: "'Inter', sans-serif" },
+                            color: isLight ? '#475569' : '#94A3B8'
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        backgroundColor: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(15, 23, 42, 0.95)',
                         titleFont: { size: 14, family: "'Poppins', sans-serif" },
+                        titleColor: isLight ? '#0F172A' : '#F8FAFC',
                         bodyFont: { size: 13, family: "'Inter', sans-serif" },
-                        padding: 12,
-                        cornerRadius: 8,
+                        bodyColor: isLight ? '#334155' : '#E2E8F0',
+                        padding: 14,
+                        cornerRadius: 12,
+                        borderColor: isLight ? 'rgba(226, 232, 240, 0.8)' : 'rgba(51, 65, 85, 0.5)',
+                        borderWidth: 1,
                         displayColors: true,
+                        boxPadding: 4,
                         callbacks: {
-                            label: function(context) {
+                            label(context) {
                                 const label = context.label || '';
                                 const value = context.parsed || 0;
-                                const total = context.chart._metasets[context.datasetIndex].total;
                                 const percentage = Math.round((value / total) * 100);
                                 return ` ${label}: ${value} repos (${percentage}%)`;
                             }
                         }
                     }
                 }
-            }
+            },
+            plugins: [centerTextPlugin(total)]
         });
     }
 };
