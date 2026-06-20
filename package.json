@@ -1,0 +1,30 @@
+{
+  "name": "github-developer-explorer",
+  "version": "1.0.0",
+  "description": "A sleek, highly modular Vanilla JS web app to search and analyze GitHub developer profiles in real-time, featuring interactive repo sorting, filtering, and Chart.js language analytics.",
+  "main": "js/app.js",
+  "scripts": {
+    "start": "npx http-server -p 8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/radheshyam-cod/GitHub-Developer-Explorer.git"
+  },
+  "keywords": [
+    "github-api",
+    "vanilla-javascript",
+    "chartjs",
+    "dark-mode",
+    "skeleton-loader",
+    "dashboard",
+    "responsive-design",
+    "css-variables",
+    "api-integration"
+  ],
+  "author": "radheshyam-cod",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/radheshyam-cod/GitHub-Developer-Explorer/issues"
+  },
+  "homepage": "https://github.com/radheshyam-cod/GitHub-Developer-Explorer#readme"
+}
